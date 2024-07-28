@@ -13,8 +13,7 @@ public static class ServiceCollections
     {
         services
             .AddScoped<ITokenService, TokenService>()
-            .AddScoped<ILoginService, LoginService>()
-            .AddScoped<IUserService, UserService>();
+            .AddScoped<ILoginService, LoginService>();
     }
 
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
