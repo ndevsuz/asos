@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 25.0.1706.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asos", "src\asos\Asos\Asos.csproj", "{3DBAF6C7-9880-45FF-9138-B6FA1A3FF7C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asos", "src\Asos\Asos.csproj", "{8BB35631-6159-493E-B768-FC92997F7FBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3DBAF6C7-9880-45FF-9138-B6FA1A3FF7C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DBAF6C7-9880-45FF-9138-B6FA1A3FF7C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DBAF6C7-9880-45FF-9138-B6FA1A3FF7C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DBAF6C7-9880-45FF-9138-B6FA1A3FF7C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB35631-6159-493E-B768-FC92997F7FBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB35631-6159-493E-B768-FC92997F7FBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB35631-6159-493E-B768-FC92997F7FBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB35631-6159-493E-B768-FC92997F7FBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
