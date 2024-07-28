@@ -6,7 +6,6 @@ namespace Asos.TheStandart.CSharp.Services;
 public class TheStandartCSharpProjectOrchestrationService(ProjectDetails projectDetails)
 {
     private TheStandartCSharpProjectService projectService;
-    private ProjectDetails projectDetails;
     private ModelService modelService;
 
     private string modelsFolderPath;

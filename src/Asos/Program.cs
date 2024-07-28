@@ -29,7 +29,7 @@ app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 app.UseStaticFiles();
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+//app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
