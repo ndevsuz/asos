@@ -1,0 +1,12 @@
+{{Header}}
+
+using System;
+
+namespace {{NameSpace}}
+{
+    public class DateTimeBroker : IDateTimeBroker
+    {
+        public DateTimeOffset GetCurrentDateTimeOffset() =>
+            DateTimeOffset.UtcNow;
+    }
+}

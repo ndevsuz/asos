@@ -1,0 +1,14 @@
+{{Header}}
+
+using System;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class Failed{{ModelName}}StorageException : Xeption
+    {
+        public Failed{{ModelName}}StorageException(Exception innerException)
+            : base(message: "Failed {{modelName}} storage error occurred, contact support.", innerException)
+        { }
+    }
+}

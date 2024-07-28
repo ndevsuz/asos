@@ -1,0 +1,157 @@
+{{Header}}
+
+using System;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}Service
+    {
+        private void Validate{{ModelName}}OnAdd({{ModelName}} {{modelName}})
+        {
+            Validate{{ModelName}}NotNull({{modelName}});
+
+            Validate(
+{{Validations}}
+                (Rule: IsNotRecent({{modelName}}.CreatedDate), Parameter: nameof({{ModelName}}.CreatedDate)),
+
+                (Rule: IsNotSame(
+                    firstDate: {{modelName}}.CreatedDate,
+                    secondDate: {{modelName}}.UpdatedDate,
+                    secondDateName: nameof({{ModelName}}.UpdatedDate)),
+
+                    Parameter: nameof({{ModelName}}.CreatedDate)));
+        }
+
+        private void Validate{{ModelName}}OnModify({{ModelName}} {{modelName}})
+        {
+            Validate{{ModelName}}NotNull({{modelName}});
+
+            Validate(
+{{Validations}}
+                (Rule: IsNotRecent({{modelName}}.UpdatedDate), Parameter: nameof({{ModelName}}.UpdatedDate)),
+
+                (Rule: IsSame(
+                    firstDate: {{modelName}}.UpdatedDate,
+                    secondDate: {{modelName}}.CreatedDate,
+                    secondDateName: nameof({{modelName}}.CreatedDate)),
+                    Parameter: nameof({{modelName}}.UpdatedDate)));
+        }
+
+        private static void ValidateAgainstStorage{{ModelName}}OnModify({{ModelName}} input{{ModelName}}, {{ModelName}} storage{{ModelName}})
+        {
+            ValidateStorage{{ModelName}}(storage{{ModelName}}, input{{ModelName}}.Id);
+            Validate(
+            (Rule: IsNotSame(
+                    firstDate: input{{ModelName}}.CreatedDate,
+                    secondDate: storage{{ModelName}}.CreatedDate,
+                    secondDateName: nameof({{ModelName}}.CreatedDate)),
+                    Parameter: nameof({{ModelName}}.CreatedDate)),
+
+                     (Rule: IsSame(
+                        firstDate: input{{ModelName}}.UpdatedDate,
+                        secondDate: storage{{ModelName}}.UpdatedDate,
+                        secondDateName: nameof({{ModelName}}.UpdatedDate)),
+                        Parameter: nameof({{ModelName}}.UpdatedDate)));
+        }
+
+        private static void ValidateStorage{{ModelName}}({{ModelName}} maybe{{ModelName}}, Guid {{modelName}}Id)
+        {
+            if (maybe{{ModelName}} is null)
+            {
+                throw new NotFound{{ModelName}}Exception({{modelName}}Id);
+            }
+        }
+
+        private void Validate{{ModelName}}Id(Guid {{modelName}}Id) =>
+             Validate((Rule: IsInvalid({{modelName}}Id), Parameter: nameof({{ModelName}}.Id)));
+
+        private void Validate{{ModelName}}NotNull({{ModelName}} {{modelName}})
+        {
+            if ({{modelName}} is null)
+            {
+                throw new Null{{ModelName}}Exception();
+            }
+        }
+
+        private static dynamic IsInvalid(Guid id) => new
+        {
+            Condition = id == Guid.Empty,
+            Message = "Id is required"
+        };
+
+        private static dynamic IsNotSame(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate != secondDate,
+                Message = $"Date is not same as {secondDateName}"
+            };
+
+        private dynamic IsInvalid(string text) => new
+        {
+            Condition = string.IsNullOrWhiteSpace(text),
+            Message = "Text is required"
+        };
+
+        private dynamic IsInvalid(DateTimeOffset date) => new
+        {
+            Condition = date == default,
+            Message = "Date is required"
+        };
+
+        private static dynamic IsInvalid<T>(T value) => new
+        {
+            Condition = IsEnumInvalid(value),
+            Message = "Value is not recognized"
+        };
+
+        private dynamic IsNotRecent(DateTimeOffset date) => new
+        {
+            Condition = IsDateNotRecent(date),
+            Message = "Date is not recent"
+        };
+
+        private static bool IsEnumInvalid<T>(T value)
+        {
+            bool isDefined = Enum.IsDefined(typeof(T), value);
+
+            return isDefined is false;
+        }
+
+        private static dynamic IsSame(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is the same as {secondDateName}"
+            };
+
+        private bool IsDateNotRecent(DateTimeOffset date)
+        {
+            DateTimeOffset currentDate = this.dateTimeBroker.GetCurrentDateTimeOffset();
+            TimeSpan timeDifference = currentDate.Subtract(date);
+
+            return timeDifference.TotalSeconds is > 60 or < 0;
+        }
+
+        private static void Validate(params (dynamic Rule, string Parameter)[] validations)
+        {
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+            foreach ((dynamic rule, string parameter) in validations)
+            {
+                if (rule.Condition)
+                {
+                    invalid{{ModelName}}Exception.UpsertDataList(
+                        key: parameter,
+                        value: rule.Message);
+                }
+            }
+            invalid{{ModelName}}Exception.ThrowIfContainsErrors();
+        }
+    }
+}

@@ -1,0 +1,93 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using FluentAssertions;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnRetrieveByIdIfIdIsInvalidAndLogItAsync()
+        {
+            //given
+            var invalid{{ModelName}}Id = Guid.Empty;
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.Id),
+                values: "Id is required");
+
+            var excpected{{ModelName}}ValidationException = new
+                {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+            //when
+            ValueTask<{{ModelName}}> retrieve{{ModelName}}ByIdTask =
+                this.{{modelName}}Service.Retrieve{{ModelName}}ByIdAsync(invalid{{ModelName}}Id);
+
+            {{ModelName}}ValidationException actuall{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    retrieve{{ModelName}}ByIdTask.AsTask);
+
+            //then
+            actuall{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(excpected{{ModelName}}ValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    excpected{{ModelName}}ValidationException))), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Never);
+
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowNotFoundExceptionOnRetrieveByIdIf{{ModelName}}IsNotFoundAndLogItAsync()
+        {
+            Guid some{{ModelName}}Id = Guid.NewGuid();
+            {{ModelName}} no{{ModelName}} = null;
+
+            var notFound{{ModelName}}Exception =
+                new NotFound{{ModelName}}Exception(some{{ModelName}}Id);
+
+            var excpected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(notFound{{ModelName}}Exception);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()))
+                    .ReturnsAsync(no{{ModelName}});
+
+            //when 
+            ValueTask<{{ModelName}}> retrieve{{ModelName}}ByIdTask =
+                this.{{modelName}}Service.Retrieve{{ModelName}}ByIdAsync(some{{ModelName}}Id);
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    retrieve{{ModelName}}ByIdTask.AsTask);
+
+            //then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(excpected{{ModelName}}ValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    excpected{{ModelName}}ValidationException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

@@ -1,0 +1,13 @@
+﻿{{Header}}
+
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class Invalid{{ModelName}}Exception : Xeption
+    {
+        public Invalid{{ModelName}}Exception()
+            : base(message: "{{ModelName}} is invalid.")
+        { }
+    }
+}

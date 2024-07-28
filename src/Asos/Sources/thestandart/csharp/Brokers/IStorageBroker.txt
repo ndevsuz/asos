@@ -1,0 +1,7 @@
+{{Header}}
+
+namespace {{NameSpace}}
+{
+    public partial interface IStorageBroker
+    { }
+}

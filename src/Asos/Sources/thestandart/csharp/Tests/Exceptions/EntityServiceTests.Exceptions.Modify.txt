@@ -1,0 +1,198 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using FluentAssertions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldThrowCriticalDependencyExceptionOnModifyIfSqlErrorOccursAndLogItAsync()
+        {
+            // given
+            DateTimeOffset someDateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}();
+            {{ModelName}} some{{ModelName}} = random{{ModelName}};
+            Guid {{modelName}}Id = some{{ModelName}}.Id;
+            SqlException sqlException = CreateSqlException();
+
+            var failed{{ModelName}}StorageException =
+                new Failed{{ModelName}}StorageException(sqlException);
+
+            var expected{{ModelName}}DependencyException =
+                new {{ModelName}}DependencyException(failed{{ModelName}}StorageException);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Throws(sqlException);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(some{{ModelName}});
+
+            {{ModelName}}DependencyException actual{{ModelName}}DependencyException =
+                await Assert.ThrowsAsync<{{ModelName}}DependencyException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}DependencyException.Should().BeEquivalentTo(
+                expected{{ModelName}}DependencyException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync({{modelName}}Id), Times.Never);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Update{{ModelName}}Async(some{{ModelName}}), Times.Never);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogCritical(It.Is(SameExceptionAs(
+                    expected{{ModelName}}DependencyException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+               broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyExceptionOnModifyIfDatabaseUpdateExceptionOccursAndLogItAsync()
+        {
+            // given
+            int minutesInPast = GetRandomNegativeNumber();
+            DateTimeOffset randomDateTime = GetRandomDatetimeOffset();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(randomDateTime);
+            {{ModelName}} some{{ModelName}} = random{{ModelName}};
+            some{{ModelName}}.CreatedDate = some{{ModelName}}.CreatedDate.AddMinutes(minutesInPast);
+            var databaseUpdateException = new DbUpdateException();
+
+            var failedStorage{{ModelName}}Exception =
+                new Failed{{ModelName}}StorageException(databaseUpdateException);
+
+            var expected{{ModelName}}DependencyException =
+                new {{ModelName}}DependencyException(failedStorage{{ModelName}}Exception);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Throws(databaseUpdateException);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(some{{ModelName}});
+
+            {{ModelName}}DependencyException actual{{ModelName}}DependencyException =
+                await Assert.ThrowsAsync<{{ModelName}}DependencyException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}DependencyException.Should().BeEquivalentTo(expected{{ModelName}}DependencyException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}DependencyException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyValidationExceptionOnModifyIfDatabaseUpdateConcurrencyErrorOccursAndLogItAsync()
+        {
+            // given
+            int minutesInPast = GetRandomNegativeNumber();
+            DateTimeOffset randomDateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(randomDateTime);
+            {{ModelName}} some{{ModelName}} = random{{ModelName}};
+            some{{ModelName}}.CreatedDate = randomDateTime.AddMinutes(minutesInPast);
+            var databaseUpdateConcurrencyException = new DbUpdateConcurrencyException();
+
+            var locked{{ModelName}}Exception =
+                new Locked{{ModelName}}Exception(databaseUpdateConcurrencyException);
+
+            var expected{{ModelName}}DependencyValidationException =
+                new {{ModelName}}DependencyValidationException(locked{{ModelName}}Exception);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Throws(databaseUpdateConcurrencyException);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(some{{ModelName}});
+
+            {{ModelName}}DependencyValidationException actual{{ModelName}}DependencyValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}DependencyValidationException>(modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}DependencyValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}DependencyValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}DependencyValidationException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnModifyIfDatabaseUpdateErrorOccursAndLogItAsync()
+        {
+            // given
+            int minutesInPast = GetRandomNegativeNumber();
+            var randomDateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(randomDateTime);
+            {{ModelName}} some{{ModelName}} = random{{ModelName}};
+            some{{ModelName}}.CreatedDate = some{{ModelName}}.CreatedDate.AddMinutes(minutesInPast);
+            var serviceException = new Exception();
+
+            var failed{{ModelName}}ServiceException =
+                new Failed{{ModelName}}ServiceException(serviceException);
+
+            var expected{{ModelName}}ServiceException =
+                new {{ModelName}}ServiceException(failed{{ModelName}}ServiceException);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Throws(serviceException);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(some{{ModelName}});
+
+            {{ModelName}}ServiceException actual{{ModelName}}ServiceException =
+                await Assert.ThrowsAsync<{{ModelName}}ServiceException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ServiceException.Should().BeEquivalentTo(expected{{ModelName}}ServiceException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ServiceException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

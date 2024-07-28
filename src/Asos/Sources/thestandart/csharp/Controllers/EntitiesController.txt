@@ -1,0 +1,167 @@
+{{Header}}
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using {{ProjectName}}.Services.Foundations.{{ModelNamePlural}};
+using Microsoft.AspNetCore.Mvc;
+using RESTFulSense.Controllers;
+
+namespace {{ProjectName}}.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class {{ModelNamePlural}}Controller : RESTFulController
+    {
+        private readonly I{{ModelName}}Service {{modelName}}Service;
+
+        public {{ModelNamePlural}}Controller(I{{ModelName}}Service {{modelName}}Service) =>
+            this.{{modelName}}Service = {{modelName}}Service;
+
+        [HttpPost]
+        public async ValueTask<ActionResult<{{ModelName}}>> Post{{ModelName}}Async({{ModelName}} {{modelName}})
+        {
+            try
+            {
+                {{ModelName}} added{{ModelName}} = await this.{{modelName}}Service.Add{{ModelName}}Async({{modelName}});
+
+                return Created(added{{ModelName}});
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+            {
+                return BadRequest({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyValidationException {{modelName}}DependencyValidationException)
+                when ({{modelName}}DependencyValidationException.InnerException is AlreadyExists{{ModelName}}Exception)
+            {
+                return Conflict({{modelName}}DependencyValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyException {{modelName}}DependencyException)
+            {
+                return InternalServerError({{modelName}}DependencyException.InnerException);
+            }
+            catch ({{ModelName}}ServiceException {{modelName}}ServiceException)
+            {
+                return InternalServerError({{modelName}}ServiceException.InnerException);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult<IQueryable<{{ModelName}}>> GetAll{{ModelNamePlural}}()
+        {
+            try
+            {
+                IQueryable<{{ModelName}}> all{{ModelNamePlural}} = this.{{modelName}}Service.RetrieveAll{{ModelNamePlural}}();
+
+                return Ok(all{{ModelNamePlural}});
+            }
+            catch ({{ModelName}}DependencyException {{modelName}}DependencyException)
+            {
+                return InternalServerError({{modelName}}DependencyException.InnerException);
+            }
+            catch ({{ModelName}}ServiceException {{modelName}}ServiceException)
+            {
+                return InternalServerError({{modelName}}ServiceException.InnerException);
+            }
+        }
+
+        [HttpGet("{{{modelName}}Id}")]
+        public async ValueTask<ActionResult<{{ModelName}}>> Get{{ModelName}}ByIdAsync(Guid {{modelName}}Id)
+        {
+            try
+            {
+                return await this.{{modelName}}Service.Retrieve{{ModelName}}ByIdAsync({{modelName}}Id);
+            }
+            catch ({{ModelName}}DependencyException {{modelName}}DependencyException)
+            {
+                return InternalServerError({{modelName}}DependencyException);
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+                when ({{modelName}}ValidationException.InnerException is Invalid{{ModelName}}Exception)
+            {
+                return BadRequest({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+                 when ({{modelName}}ValidationException.InnerException is NotFound{{ModelName}}Exception)
+            {
+                return NotFound({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}ServiceException {{modelName}}ServiceException)
+            {
+                return InternalServerError({{modelName}}ServiceException);
+            }
+        }
+
+        [HttpPut]
+        public async ValueTask<ActionResult<{{ModelName}}>> Put{{ModelName}}Async({{ModelName}} {{modelName}})
+        {
+            try
+            {
+                {{ModelName}} modified{{ModelName}} =
+                    await this.{{modelName}}Service.Modify{{ModelName}}Async({{modelName}});
+
+                return Ok(modified{{ModelName}});
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+                when ({{modelName}}ValidationException.InnerException is NotFound{{ModelName}}Exception)
+            {
+                return NotFound({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+            {
+                return BadRequest({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyValidationException {{modelName}}DependencyValidationException)
+            {
+                return BadRequest({{modelName}}DependencyValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyException {{modelName}}DependencyException)
+            {
+                return InternalServerError({{modelName}}DependencyException.InnerException);
+            }
+            catch ({{ModelName}}ServiceException {{modelName}}ServiceException)
+            {
+                return InternalServerError({{modelName}}ServiceException.InnerException);
+            }
+        }
+
+        [HttpDelete("{{{modelName}}Id}")]
+        public async ValueTask<ActionResult<{{ModelName}}>> Delete{{ModelName}}ByIdAsync(Guid {{modelName}}Id)
+        {
+            try
+            {
+                {{ModelName}} deleted{{ModelName}} = await this.{{modelName}}Service.Remove{{ModelName}}ByIdAsync({{modelName}}Id);
+
+                return Ok(deleted{{ModelName}});
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+                when ({{modelName}}ValidationException.InnerException is NotFound{{ModelName}}Exception)
+            {
+                return NotFound({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}ValidationException {{modelName}}ValidationException)
+            {
+                return BadRequest({{modelName}}ValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyValidationException {{modelName}}DependencyValidationException)
+                when ({{modelName}}DependencyValidationException.InnerException is Locked{{ModelName}}Exception)
+            {
+                return Locked({{modelName}}DependencyValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyValidationException {{modelName}}DependencyValidationException)
+            {
+                return BadRequest({{modelName}}DependencyValidationException.InnerException);
+            }
+            catch ({{ModelName}}DependencyException {{modelName}}DependencyException)
+            {
+                return InternalServerError({{modelName}}DependencyException.InnerException);
+            }
+            catch ({{ModelName}}ServiceException {{modelName}}ServiceException)
+            {
+                return InternalServerError({{modelName}}ServiceException.InnerException);
+            }
+        }
+    }
+}

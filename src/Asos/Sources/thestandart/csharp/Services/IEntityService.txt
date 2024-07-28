@@ -1,0 +1,37 @@
+{{Header}}
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+
+namespace {{NameSpace}}
+{
+    public interface I{{ModelName}}Service  
+    {
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ValidationException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyValidationException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ServiceException"></exception>
+        ValueTask<{{ModelName}}> Add{{ModelName}}Async({{ModelName}} {{modelName}});
+
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ServiceException"></exception>
+        IQueryable<{{ModelName}}> RetrieveAll{{ModelNamePlural}}();
+
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ServiceException"></exception>
+        ValueTask<{{ModelName}}> Retrieve{{ModelName}}ByIdAsync(Guid {{modelName}}Id);
+
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ValidationException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyValidationException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ServiceException"></exception>
+        ValueTask<{{ModelName}}> Modify{{ModelName}}Async({{ModelName}} {{modelName}});
+
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyValidationException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}DependencyException"></exception>
+        /// <exception cref="Models.{{ModelNamePlural}}.Exceptions.{{ModelName}}ServiceException"></exception>
+        ValueTask<{{ModelName}}> Remove{{ModelName}}ByIdAsync(Guid {{modelName}}Id);
+    }
+}

@@ -1,0 +1,141 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using FluentAssertions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldThrowDependencyValidationOnRemoveIfDatabaseUpdateConcurrencyErrorOccursAndLogItAsync()
+        {
+            // given
+            Guid some{{ModelName}}Id = Guid.NewGuid();
+
+            var databaseUpdateConcurrencyException = new DbUpdateConcurrencyException();
+
+            var locked{{ModelName}}Exception =
+                new Locked{{ModelName}}Exception(databaseUpdateConcurrencyException);
+
+            var expected{{ModelName}}DependencyValidationException =
+                new {{ModelName}}DependencyValidationException(locked{{ModelName}}Exception);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(databaseUpdateConcurrencyException);
+
+            // when
+            ValueTask<{{ModelName}}> remove{{ModelName}}ByIdTask =
+               this.{{modelName}}Service.Remove{{ModelName}}ByIdAsync(some{{ModelName}}Id);
+
+            {{ModelName}}DependencyValidationException actual{{ModelName}}DependencyValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}DependencyValidationException>(
+                    remove{{ModelName}}ByIdTask.AsTask);
+
+            // then
+            actual{{ModelName}}DependencyValidationException.Should().BeEquivalentTo(
+               expected{{ModelName}}DependencyValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}DependencyValidationException))), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Delete{{ModelName}}Async(It.IsAny<{{ModelName}}>()), Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyExceptionOnRemoveWhenSqlExceptionOccursAndLogItAsync()
+        {
+            // given
+            Guid someId = Guid.NewGuid();
+            SqlException sqlException = CreateSqlException();
+
+            var failed{{ModelName}}StorageException =
+                new Failed{{ModelName}}StorageException(sqlException);
+
+            var expected{{ModelName}}DependencyException =
+                new {{ModelName}}DependencyException(failed{{ModelName}}StorageException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(someId))
+                    .Throws(sqlException);
+            // when
+            ValueTask<{{ModelName}}> remove{{ModelName}}Task =
+                this.{{modelName}}Service.Remove{{ModelName}}ByIdAsync(someId);
+
+            {{ModelName}}DependencyException actual{{ModelName}}DependencyException =
+                await Assert.ThrowsAsync<{{ModelName}}DependencyException>(
+                    remove{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}DependencyException.Should().BeEquivalentTo(expected{{ModelName}}DependencyException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogCritical(It.Is(SameExceptionAs(
+                    expected{{ModelName}}DependencyException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnRemoveIfExceptionOccursAndLogItAsync()
+        {
+            // given
+            Guid some{{ModelName}}Id = Guid.NewGuid();
+            var serviceException = new Exception();
+
+            var failed{{ModelName}}ServiceException =
+                new Failed{{ModelName}}ServiceException(serviceException);
+
+            var expected{{ModelName}}ServiceException =
+                new {{ModelName}}ServiceException(failed{{ModelName}}ServiceException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(some{{ModelName}}Id))
+                    .Throws(serviceException);
+
+            // when
+            ValueTask<{{ModelName}}> remove{{ModelName}}ByIdTask =
+                this.{{modelName}}Service.Remove{{ModelName}}ByIdAsync(some{{ModelName}}Id);
+
+            {{ModelName}}ServiceException actual{{ModelName}}ServiceException =
+                await Assert.ThrowsAsync<{{ModelName}}ServiceException>(
+                    remove{{ModelName}}ByIdTask.AsTask);
+
+            // then
+            actual{{ModelName}}ServiceException.Should().BeEquivalentTo(expected{{ModelName}}ServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ServiceException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

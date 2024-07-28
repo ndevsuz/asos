@@ -1,0 +1,14 @@
+﻿{{Header}}
+
+using System;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class Locked{{ModelName}}Exception : Xeption
+    {
+        public Locked{{ModelName}}Exception(Exception innerException)
+            : base(message: "{{ModelName}} is locked, please try again.", innerException)
+        { }
+    }
+}

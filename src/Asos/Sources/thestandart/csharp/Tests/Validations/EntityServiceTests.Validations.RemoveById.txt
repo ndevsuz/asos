@@ -1,0 +1,95 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using FluentAssertions;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnRemoveIfIdIsInvalidAndLogItAsync()
+        {
+            // given
+            Guid invalid{{ModelName}}Id = Guid.Empty;
+
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.Id),
+                values: "Id is required");
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+            // when
+            ValueTask<{{ModelName}}> remove{{ModelName}}ByIdTask =
+                this.{{modelName}}Service.Remove{{ModelName}}ByIdAsync(invalid{{ModelName}}Id);
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    remove{{ModelName}}ByIdTask.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Delete{{ModelName}}Async(It.IsAny<{{ModelName}}>()), Times.Never);
+
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowNotFoundExceptionOnRemoveIf{{ModelName}}IsNotFoundAndLogItAsync()
+        {
+            // given
+            Guid random{{ModelName}}Id = Guid.NewGuid();
+            Guid input{{ModelName}}Id = random{{ModelName}}Id;
+            {{ModelName}} no{{ModelName}} = null;
+
+            var notFound{{ModelName}}Exception =
+                new NotFound{{ModelName}}Exception(input{{ModelName}}Id);
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(notFound{{ModelName}}Exception);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(input{{ModelName}}Id)).ReturnsAsync(no{{ModelName}});
+
+            // when
+            ValueTask<{{ModelName}}> remove{{ModelName}}ByIdTask =
+                this.{{modelName}}Service.Remove{{ModelName}}ByIdAsync(input{{ModelName}}Id);
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    remove{{ModelName}}ByIdTask.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}
