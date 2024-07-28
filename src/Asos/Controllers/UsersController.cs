@@ -20,7 +20,7 @@ public class UsersController : BaseController
     }
 
 
-    [HttpPost("validate")]
+    [HttpPost("generate")]
     public async Task<IActionResult> GetToken(string token, ProjectDetails projectDetails)
     {
         var validToken = await tokenService.GetToken(token);

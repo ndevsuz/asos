@@ -1,4 +1,5 @@
 using Asos.Interfaces;
+using Asos.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,16 +13,34 @@ public class AdminController(ITokenService tokenService, ILoginService loginServ
     [AllowAnonymous]
     [HttpGet("login")]
     public async Task<IActionResult> LoginAsync(string username, string password)
-        => Ok(await loginService.LoginAsync(username, password));
+        => Ok(new Response()
+        {
+            StatusCode = 200,
+            Message = "Succes!",
+            Data = await loginService.LoginAsync(username, password)
+
+        });
 
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateTokenAsync()
     {
         var token = await tokenService.GenerateToken();
-        return Ok(token);
+        return Ok(new Response()
+        {
+            StatusCode = 200,
+            Message = "Succes!",
+            Data = token
+
+        });
     }
 
     [HttpGet("get-all")]
     public async Task<IActionResult> GetAllAsync()
-        => Ok(await tokenService.GetAllAsync());
+        => Ok(new Response()
+        {
+            StatusCode = 200,
+            Message = "Succes!",
+            Data = await tokenService.GetAllAsync()
+
+        });
 }
