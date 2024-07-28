@@ -2,7 +2,7 @@ using Asos.Helpers;
 
 namespace Asos.TheStandart.CSharp.Services;
 
-public static class PackageManager
+public static class TheStandartCSharpPackageManager
 {
     public static void InstallPackagesToApiProject(string apiProjectPath)
     {

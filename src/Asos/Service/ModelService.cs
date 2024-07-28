@@ -31,7 +31,6 @@ public class ModelService
             File.WriteAllText(outputFilePath, classContent);
         }
 
-        //Console.WriteLine("Classlar alohida fayllarga saqlandi.");
     }
 
     static int FindClassEndIndex(string content, int startIndex)

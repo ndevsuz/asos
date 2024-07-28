@@ -1,6 +1,6 @@
 namespace Asos.TheStandart.CSharp.Services;
 
-public class Tokenizator
+public class TheStandartCSharpTokenizator
 {
     public static Dictionary<string, string> GetProperties(string modelPath)
     {
