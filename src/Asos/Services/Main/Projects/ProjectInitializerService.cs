@@ -3,19 +3,20 @@ using Asos.Services.Main.Projects.Models;
 
 namespace Asos.Services.Main.Projects
 {
-    public class ProjectInitializerService(
-        IHostEnvironment hostEnvironment,
-        string projectName)
+    public class ProjectInitializerService(string projectName,
+        IHostEnvironment hostEnvironment = null
+        )
     {
         public ProjectsPath Initialize()
         {
-            var wwwroot = hostEnvironment.ContentRootPath;
-            var tempFolderPath = Path.Combine(wwwroot, "TempProjects", Guid.NewGuid().ToString());
+            // var wwwroot = hostEnvironment.ContentRootPath;
+            var wwwroot = "wwwroot";
+            var tempFolderPath = Path.Combine("../TempProjects", Guid.NewGuid().ToString());
 
             if (!Directory.Exists(tempFolderPath))
                 Directory.CreateDirectory(tempFolderPath);
 
-            var projectFolderPath = Path.Combine(tempFolderPath);
+            var projectFolderPath = Path.Combine(tempFolderPath, projectName);
 
             if (!Directory.Exists(projectFolderPath))
                 Directory.CreateDirectory(projectFolderPath);
@@ -38,17 +39,17 @@ namespace Asos.Services.Main.Projects
             var serviceName = $"{projectName}.Service";
             var apiName = $"{projectName}.Api";
 
-            Process.ExecuteCommand($"dotnet new classlib --name {domainName} --output {srcFolderPath}");
+            Process.ExecuteCommand($"dotnet new classlib --name {domainName} --output {Path.Combine(srcFolderPath, domainName)}");
             Process.ExecuteCommand($"dotnet sln {solutionPath} add {Path.Combine(domain, $"{domainName}.csproj")}");
 
-            Process.ExecuteCommand($"dotnet new classlib --name {dataAccessName} --output {srcFolderPath}");
+            Process.ExecuteCommand($"dotnet new classlib --name {dataAccessName} --output {Path.Combine(srcFolderPath, dataAccessName)}");
             Process.ExecuteCommand($"dotnet sln {solutionPath} add {Path.Combine(dataAccess, $"{dataAccessName}.csproj")}");
 
-            Process.ExecuteCommand($"dotnet new classlib --name {serviceName} --output {srcFolderPath}");
+            Process.ExecuteCommand($"dotnet new classlib --name {serviceName} --output {Path.Combine(srcFolderPath, serviceName)}");
             Process.ExecuteCommand($"dotnet sln {solutionPath} add {Path.Combine(service, $"{serviceName}.csproj")}");
 
-            Process.ExecuteCommand($"dotnet new webapi --name {apiName} --output {srcFolderPath}");
-            Process.ExecuteCommand($"dotnet sln {solutionPath} add {Path.Combine(api, $"{apiName}/csproj")}");
+            Process.ExecuteCommand($"dotnet new webapi --name {apiName} --output {Path.Combine(srcFolderPath, apiName)}");
+            Process.ExecuteCommand($"dotnet sln {solutionPath} add {Path.Combine(api, $"{apiName}.csproj")}");
 
             //add references
             Process.ExecuteCommand($"dotnet add {Path.Combine(dataAccess, $"{dataAccessName}.csproj")} reference {Path.Combine(domain, $"{domainName}.csproj")}");
