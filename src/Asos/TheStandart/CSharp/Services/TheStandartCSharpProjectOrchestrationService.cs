@@ -17,9 +17,9 @@ public class TheStandartCSharpProjectOrchestrationService(ProjectDetails project
 
     private void Setup()
     {
-        modelsFolderPath = $"/home/tempmodels/{Guid.NewGuid()}";
-        projectFolderPath = $"/home/projects/{Guid.NewGuid()}/{projectDetails.ProjectName}";
-        sourcePath = $"/home/Sources/TheStandart/CSharp";
+        modelsFolderPath = $"/home/ubuntu/tempmodels/{Guid.NewGuid()}";
+        projectFolderPath = $"/home/ubuntu/projects/{Guid.NewGuid()}/{projectDetails.ProjectName}";
+        sourcePath = $"/home/ubuntu/Sources/TheStandart/CSharp";
 
         Directory.CreateDirectory(modelsFolderPath);
         Directory.CreateDirectory(projectFolderPath);
