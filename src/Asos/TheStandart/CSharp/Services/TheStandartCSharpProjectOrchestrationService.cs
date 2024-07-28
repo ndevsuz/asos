@@ -20,6 +20,7 @@ public class TheStandartCSharpProjectOrchestrationService(ProjectDetails project
     {
         modelsFolderPath = $"/home/tempmodels/{Guid.NewGuid()}";
         projectFolderPath = $"/home/projects/{Guid.NewGuid()}/{projectDetails.ProjectName}";
+        sourcePath = $"/home/Sources/TheStandart/CSharp";
 
         Directory.CreateDirectory(modelsFolderPath);
         Directory.CreateDirectory(projectFolderPath);
@@ -45,7 +46,11 @@ public class TheStandartCSharpProjectOrchestrationService(ProjectDetails project
             sourcePath: this.sourcePath);
     }
 
-    public void Initialize()
+    /// <summary>
+    /// Initialize Standart Api
+    /// </summary>
+    /// <returns>Returns project folder path</returns>
+    public string Initialize()
     {
         Setup();
         var projectsPath = projectService.CreateProjectStructure();
@@ -58,10 +63,14 @@ public class TheStandartCSharpProjectOrchestrationService(ProjectDetails project
         projectService.CreateModels();
         projectService.CreateExceptions();
         projectService.CreateBrokers();
+        projectService.WriteAppSettings(serverConnectionString);
         projectService.CreateServices();
         projectService.CreateControllers();
         projectService.ConfigureProject();
         projectService.WriteTests();
+        projectService.WriteAppSettings(clientConnectionString);
         projectService.BuildBuildProject();
+
+        return projectFolderPath;
     }
 }

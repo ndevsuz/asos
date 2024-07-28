@@ -1,4 +1,5 @@
 ﻿using Asos.Constants;
+using Asos.Extensions;
 using Asos.Helpers;
 using System.Text;
 
@@ -66,7 +67,7 @@ namespace Asos.TheStandart.CSharp.Services
 
         public void InitializeBuildProject()
         {
-            var content = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.BuildProject, "BuildPipelineCode.txt"));
+            var content = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.BuildProject, "BuildPipelineCode.txt"));
             content = content
                 .Replace("{{ProjectName}}", projectName)
                 .Replace("{{NameSpace}}", buildProjectName)
@@ -157,7 +158,7 @@ namespace Asos.TheStandart.CSharp.Services
                 }
 
                 var exceptionsPath = Directory.GetFiles(
-                    Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Exceptions));
+                    Path.Combine(this.sourcePath, StringConstants.Exceptions));
 
                 var exceptionNameSpace = $"{apiProjectName}.{StringConstants.Models}.{modelNamePlural}.{StringConstants.Exceptions}";
 
@@ -184,7 +185,7 @@ namespace Asos.TheStandart.CSharp.Services
         {
             Console.WriteLine("Creating brokers...");
             var brokersPath = Path.Combine(apiProjectPath, StringConstants.Brokers);
-            var brokersBasePath = Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Brokers);
+            var brokersBasePath = Path.Combine(this.sourcePath, StringConstants.Brokers);
 
             Directory.CreateDirectory(brokersPath);
 
@@ -292,9 +293,9 @@ namespace Asos.TheStandart.CSharp.Services
             fileStream2.Close();
         }
 
-        private void WriteStorageBrokers()
+        public void WriteAppSettings(string connectionString)
         {
-            var confContent = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Configurations, "AppSettings.txt"))
+            var confContent = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Configurations, "AppSettings.txt"))
                 .Replace("{{ConnectionString}}", connectionString);
 
             var appsettingsFilePath = Path.Combine(apiProjectPath, "appsettings.json");
@@ -302,7 +303,11 @@ namespace Asos.TheStandart.CSharp.Services
             fileStream.Write(Encoding.UTF8.GetBytes(confContent));
             fileStream.Flush();
             fileStream.Close();
-            fileStream = null;
+        }
+
+        private void WriteStorageBrokers()
+        {
+            var fileStream = null as FileStream;
 
             var models = Directory.GetFiles(modelsFolderPath);
             var storageBrokerNameSpace = $"{apiProjectName}.Brokers.Storages";
@@ -312,7 +317,7 @@ namespace Asos.TheStandart.CSharp.Services
                 var modelName = modelPath.PathToName();
                 var modelNamePlural = modelName.NameToPlural();
 
-                var interfaceContent = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Brokers, "IStorageBroker.Entity.txt"))
+                var interfaceContent = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Brokers, "IStorageBroker.Entity.txt"))
                     .Replace("{{Header}}", header)
                     .Replace("{{NameSpace}}", storageBrokerNameSpace)
                     .Replace("{{ProjectName}}", apiProjectName)
@@ -328,7 +333,7 @@ namespace Asos.TheStandart.CSharp.Services
                 fileStream.Close();
                 fileStream = null;
 
-                var content = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Brokers, "StorageBroker.Entity.txt"))
+                var content = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Brokers, "StorageBroker.Entity.txt"))
                     .Replace("{{Header}}", header)
                     .Replace("{{NameSpace}}", storageBrokerNameSpace)
                     .Replace("{{ProjectName}}", apiProjectName)
@@ -366,7 +371,7 @@ namespace Asos.TheStandart.CSharp.Services
 
             var modelsPath = Directory.GetFiles(modelsFolderPath);
 
-            var servicesBasePath = Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Services);
+            var servicesBasePath = Path.Combine(this.sourcePath, StringConstants.Services);
 
             foreach (var modelPath in modelsPath)
             {
@@ -424,7 +429,7 @@ namespace Asos.TheStandart.CSharp.Services
                 var validationFS = File.Open(validationPath, FileMode.Open, FileAccess.ReadWrite);
 
                 var validations = string.Empty;
-                var properties = Tokenizator.GetProperties(modelPath);
+                var properties = TheStandartCSharpTokenizator.GetProperties(modelPath);
 
                 foreach (var prop in properties)
                 {
@@ -468,7 +473,7 @@ namespace Asos.TheStandart.CSharp.Services
                 var controllerPath = Path.Combine(controllersPath, $"{modelNamePlural}Controller.cs");
                 File.Create(controllerPath).Close();
                 var fileStream = File.Open(controllerPath, FileMode.Open, FileAccess.ReadWrite);
-                var content = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Controllers, "EntitiesController.txt"))
+                var content = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Controllers, "EntitiesController.txt"))
                     .Replace("{{Header}}", header)
                     .Replace("{{ProjectName}}", apiProjectName)
                     .Replace("{{ModelName}}", modelName)
@@ -486,7 +491,7 @@ namespace Asos.TheStandart.CSharp.Services
             var startupFilePath = Path.Combine(apiProjectPath, "Startup.cs");
             File.Create(startupFilePath).Close();
             var fs = File.Open(startupFilePath, FileMode.Open, FileAccess.Write);
-            var content = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Configurations, "Startup.txt"))
+            var content = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Configurations, "Startup.txt"))
                 .Replace("{{Header}}", header)
                 .Replace("{{ProjectName}}", apiProjectName);
 
@@ -510,7 +515,7 @@ namespace Asos.TheStandart.CSharp.Services
             fs.Flush();
             fs.Close();
 
-            var content2 = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Configurations, "Program.txt"))
+            var content2 = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Configurations, "Program.txt"))
                 .Replace("{{Header}}", header)
                 .Replace("{{ProjectName}}", apiProjectName);
 
@@ -544,8 +549,8 @@ namespace Asos.TheStandart.CSharp.Services
                 AddLogicTests(modelName, modelNamePlural, modelTestsPath);
                 AddExceptionsTests(modelName, modelNamePlural, modelTestsPath);
 
-                var properties = Tokenizator.GetProperties(modelPath);
-                var nameProperty = Tokenizator.GetNamePropery(properties);
+                var properties = TheStandartCSharpTokenizator.GetProperties(modelPath);
+                var nameProperty = TheStandartCSharpTokenizator.GetNamePropery(properties);
 
                 if (nameProperty.Property != string.Empty && nameProperty.Type != string.Empty)
                 {
@@ -565,7 +570,7 @@ namespace Asos.TheStandart.CSharp.Services
         private void AddValidationsTestRetrieveById(string modelName, string modelNamePlural, string modelTestsPath, Dictionary<string, string> properties)
         {
             var content = File.ReadAllText(
-               Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.RetrieveById.txt"))
+               Path.Combine(this.sourcePath, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.RetrieveById.txt"))
                    .Replace("{{Header}}", header)
                    .Replace("{{NameSpace}}", $"{testProjectName}.Services.Foundations.{modelNamePlural}")
                    .Replace("{{ProjectName}}", apiProjectName)
@@ -585,7 +590,7 @@ namespace Asos.TheStandart.CSharp.Services
         private void AddValidationsTestRemoveById(string modelName, string modelNamePlural, string modelTestsPath, Dictionary<string, string> properties)
         {
             var content = File.ReadAllText(
-                Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.RemoveById.txt"))
+                Path.Combine(this.sourcePath, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.RemoveById.txt"))
                     .Replace("{{Header}}", header)
                     .Replace("{{NameSpace}}", $"{testProjectName}.Services.Foundations.{modelNamePlural}")
                     .Replace("{{ProjectName}}", apiProjectName)
@@ -632,10 +637,10 @@ namespace Asos.TheStandart.CSharp.Services
                 }
             }
 
-            var nameProp = Tokenizator.GetNamePropery(properties);
+            var nameProp = TheStandartCSharpTokenizator.GetNamePropery(properties);
 
             var content = File.ReadAllText(
-                Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.Modify.txt"))
+                Path.Combine(this.sourcePath, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.Modify.txt"))
                     .Replace("{{Header}}", header)
                     .Replace("{{ProjectName}}", apiProjectName)
                     .Replace("{{NameSpace}}", $"{testProjectName}.Services.Foundations.{modelNamePlural}")
@@ -655,7 +660,7 @@ namespace Asos.TheStandart.CSharp.Services
         {
             var @namespace = $"{testProjectName}.Services.Foundations.{modelNamePlural}";
 
-            var nameProp = Tokenizator.GetNamePropery(properties);
+            var nameProp = TheStandartCSharpTokenizator.GetNamePropery(properties);
 
             var validations = string.Empty;
             foreach (var prop in properties)
@@ -680,7 +685,7 @@ namespace Asos.TheStandart.CSharp.Services
                 }
             }
 
-            var content = File.ReadAllText(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.Add.txt"))
+            var content = File.ReadAllText(Path.Combine(this.sourcePath, StringConstants.Tests, StringConstants.Validations, "EntityServiceTests.Validations.Add.txt"))
                 .Replace("{{NameProp}}", nameProp.Property)
                 .Replace("{{Validations}}", validations)
                 .Replace("{{Header}}", header)
@@ -702,7 +707,7 @@ namespace Asos.TheStandart.CSharp.Services
 
         private void AddExceptionsTests(string modelName, string modelNamePlural, string modelTestsPath)
         {
-            var testsPath = Directory.GetFiles(Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, StringConstants.Exceptions));
+            var testsPath = Directory.GetFiles(Path.Combine(this.sourcePath, StringConstants.Tests, StringConstants.Exceptions));
 
             var @namespace = $"{testProjectName}.Services.Foundations.{modelNamePlural}";
 
@@ -730,7 +735,7 @@ namespace Asos.TheStandart.CSharp.Services
         private void AddLogicTests(string modelName, string modelNamePlural, string modelTestsPath)
         {
             var testsPath = Directory.GetFiles(
-                Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, StringConstants.Logic));
+                Path.Combine(this.sourcePath, StringConstants.Tests, StringConstants.Logic));
 
             var @namespace = $"{testProjectName}.Services.Foundations.{modelNamePlural}";
 
@@ -757,7 +762,7 @@ namespace Asos.TheStandart.CSharp.Services
         private void AddTestsFile(string modelName, string modelNamePlural, string modelTestsPath)
         {
             var content = File.ReadAllText(
-                Path.Combine("..", "..", "..", StringConstants.Source, StringConstants.Tests, "EntityServiceTests.txt"))
+                Path.Combine(this.sourcePath, StringConstants.Tests, "EntityServiceTests.txt"))
                     .Replace("{{Header}}", header)
                     .Replace("{{ApiProjectName}}", apiProjectName)
                     .Replace("{{ModelNamePlural}}", modelNamePlural)
