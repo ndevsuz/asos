@@ -7,7 +7,8 @@ public class ModelService
 {
     public void SplitModels(IFormFile formFile, string targetModelsPath)
     {
-        string inputFilePath = $"/home/ubuntu/TempUnSplittedModels/{formFile.Name}";
+        var currentDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
+        string inputFilePath = $"{currentDirectory}/TempUnSplittedModels/{formFile.Name}";
         Directory.CreateDirectory(inputFilePath);
         var stream = File.OpenWrite(inputFilePath);
 
