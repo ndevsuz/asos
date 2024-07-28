@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Microsoft.AspNetCore.SignalR.Protocol;
+using System.Text.RegularExpressions;
 
 namespace Asos.Services;
 
@@ -6,7 +7,14 @@ public class ModelService
 {
     public void SplitModels(IFormFile formFile, string targetModelsPath)
     {
-        string inputFilePath = formFile.FileName;
+        string inputFilePath = $"/home/ubuntu/TempUnSplittedModels/{formFile.Name}";
+        Directory.CreateDirectory(inputFilePath);
+        var stream = File.OpenWrite(inputFilePath);
+
+        formFile.CopyToAsync(stream);
+        stream.Flush();
+        stream.Close();
+
         string outputDirectory = targetModelsPath;
 
         if (!Directory.Exists(outputDirectory))
