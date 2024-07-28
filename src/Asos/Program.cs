@@ -20,7 +20,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.ConfigureSwagger();
 builder.Services.AddServices();
 builder.Services.AddJwt(builder.Configuration);
 
@@ -36,8 +36,8 @@ app.UseCors("AllowAll");
 app.UseStaticFiles();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.MapControllers();
-
-Process.ExecuteCommand("dotnet --version    ");
+app.UseAuthorization();
+app.UseAuthentication();
 app.UseHttpsRedirection();
 
 app.Run();
