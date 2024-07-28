@@ -1,5 +1,4 @@
 using Asos.Extensions;
-using Asos.Redis;
 using StackExchange.Redis;
 using Asos.Middlewares;
 using Asos.Models;

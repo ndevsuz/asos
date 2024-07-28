@@ -45,7 +45,7 @@ public static class ServiceCollections
     {
         services.AddSwaggerGen(option =>
         {
-            option.SwaggerDoc("v1", new OpenApiInfo { Title = "Gym API", Version = "v1" });
+            option.SwaggerDoc("v1", new OpenApiInfo { Title = "asos API", Version = "v1" });
             option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 In = ParameterLocation.Header,

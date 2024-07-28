@@ -5,19 +5,23 @@ using Microsoft.AspNetCore.Mvc;
 namespace Asos.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/token")]
 public class AdminController(ITokenService tokenService, ILoginService loginService) : BaseController
 {
-    [Authorize]
+    [AllowAnonymous]
+    [HttpGet("login")]
+    public async Task<IActionResult> LoginAsync(string username, string password)
+        => Ok(await loginService.LoginAsync(username, password));
+
     [HttpPost("generate")]
-    public async Task<IActionResult> GenerateToken()
+    public async Task<IActionResult> GenerateTokenAsync()
     {
         var token = await tokenService.GenerateToken();
         return Ok(token);
     }
 
-    [AllowAnonymous]
-    [HttpGet("login")]
-    public async Task<IActionResult> LoginAsync(string username, string password)
-        => Ok(await loginService.LoginAsync(username, password));
+    [HttpGet("get-all")]
+    public async Task<IActionResult> GetAllAsync()
+        => Ok(await tokenService.GetAllAsync());
 }

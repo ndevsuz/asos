@@ -2,8 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using Asos.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using Asos.Dtos;
 using Asos.Exceptions;
 using Asos.Helpers;
+using Asos.Models;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 
@@ -22,8 +25,17 @@ public class TokenService(IConnectionMultiplexer redis, IConfiguration configura
         }
 
         var token = Convert.ToBase64String(randomNumber);
+        var tokenCreationDto = new TokenCreationDto
+        {
+            Token = token,
+            Status = "valid",
+            CreatedDate = DateTime.UtcNow,
+            UsedDate = null
+        };
+
+        var serializedToken = JsonSerializer.Serialize(tokenCreationDto);
         var db = redis.GetDatabase();
-        await db.StringSetAsync(token, "valid");
+        await db.StringSetAsync(token, serializedToken);
         return token;
     }
 
@@ -31,22 +43,47 @@ public class TokenService(IConnectionMultiplexer redis, IConfiguration configura
     {
         var db = redis.GetDatabase();
         var tokenValue = await db.StringGetAsync(token);
-        
+
         if (string.IsNullOrEmpty(tokenValue))
         {
             throw new UnauthorizedException("Invalid token.");
         }
-        
-        if (tokenValue != "valid")
+
+        var tokenCreationDto = JsonSerializer.Deserialize<TokenCreationDto>(tokenValue);
+
+        if (tokenCreationDto is not { Status: "valid" })
         {
             throw new UnauthorizedException("Token is already used or invalid.");
         }
 
-        await db.StringSetAsync(token, "used");
+        tokenCreationDto.Status = "used";
+        tokenCreationDto.UsedDate = DateTime.UtcNow;
+
+        var serializedToken = JsonSerializer.Serialize(tokenCreationDto);
+        await db.StringSetAsync(token, serializedToken);
 
         return true;
     }
+    
+    public async Task<IList<TokenDetails>> GetAllAsync()
+    {
+        var db = redis.GetDatabase();
+        var server = redis.GetServer(redis.GetEndPoints()[0]);
+        var keys = server.Keys();
 
+        var tokenList = new List<TokenDetails>();
+
+        foreach (var key in keys)
+        {
+            var tokenValue = await db.StringGetAsync(key);
+            if (tokenValue.IsNullOrEmpty) continue;
+            var tokenDetails = JsonSerializer.Deserialize<TokenDetails>(tokenValue);
+            tokenList.Add(tokenDetails);
+        }
+
+        return tokenList;
+    }
+    
     public Task<string> GenerateJwtToken()
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["SecurityKey"]!));
@@ -62,5 +99,5 @@ public class TokenService(IConnectionMultiplexer redis, IConfiguration configura
         return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
 
     }
-    
+
 }
