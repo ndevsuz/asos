@@ -2,7 +2,7 @@
 
 namespace Asos.Services;
 
-public class ModelService
+public class NTierCSharpModelService
 {
     public void SplitModels(IFormFile formFile, string targetModelsPath)
     {

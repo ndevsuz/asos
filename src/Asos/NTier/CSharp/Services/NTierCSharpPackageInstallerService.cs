@@ -3,7 +3,7 @@ using Asos.Models;
 
 namespace Asos.Services;
 
-public class PackageInstallerService
+public class NTierCSharpPackageInstallerService
 {
     public void InstallAllPackages(ProjectsPath projectsPath)
     {

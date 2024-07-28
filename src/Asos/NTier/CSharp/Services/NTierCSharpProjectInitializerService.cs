@@ -3,7 +3,7 @@ using Asos.Models;
 
 namespace Asos.Services
 {
-    public class ProjectInitializerService(string projectName,
+    public class NTierCSharpProjectInitializerService(string projectName,
         IHostEnvironment hostEnvironment = null
         )
     {
