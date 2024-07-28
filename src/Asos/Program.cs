@@ -11,8 +11,6 @@ var redisConfiguration = $"{redisOptions?.Host}:{redisOptions?.Port}";
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConfiguration));
 
-//  NIGGA
-
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
@@ -29,7 +27,7 @@ app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 app.UseStaticFiles();
-//app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
