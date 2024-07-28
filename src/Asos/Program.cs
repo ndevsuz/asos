@@ -1,7 +1,6 @@
 using Asos.Extensions;
 using Asos.Redis;
 using StackExchange.Redis;
-using Asos.Helpers;
 using Asos.Middlewares;
 using Asos.Models;
 
@@ -20,7 +19,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.ConfigureSwagger();
 builder.Services.AddServices();
 builder.Services.AddJwt(builder.Configuration);
 
@@ -35,9 +34,11 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseStaticFiles();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseHttpsRedirection();
+app.UseAuthentication(); 
+app.UseAuthorization();
 app.MapControllers();
 
-Process.ExecuteCommand("dotnet --version    ");
-app.UseHttpsRedirection();
+
 
 app.Run();
