@@ -6,9 +6,9 @@ namespace Asos.TheStandart.CSharp.Services;
 public class TheStandartCSharpProjectOrchestrationService(ProjectDetails projectDetails)
 {
     private TheStandartCSharpProjectService projectService;
-    private ModelService modelService;
 
     private string modelsFolderPath;
+    private ModelService modelService;
     private string projectFolderPath;
     private string header;
     private string serverConnectionString;
@@ -32,7 +32,7 @@ public class TheStandartCSharpProjectOrchestrationService(ProjectDetails project
         serverConnectionString = $"Host=localhost;Port=5432;Database={projectDetails.DatabaseName};Username=postgres;Password=olma";
         clientConnectionString = $"Host={projectDetails.Host};Port={projectDetails.Port};Database={projectDetails.DatabaseName};Username={projectDetails.UserName};Password={projectDetails.Password}";
 
-
+        modelService = new ModelService();
         modelService.SplitModels(projectDetails.Models, modelsFolderPath);
 
         projectService = new TheStandartCSharpProjectService(
@@ -43,6 +43,7 @@ public class TheStandartCSharpProjectOrchestrationService(ProjectDetails project
             serverConnectionString: this.serverConnectionString,
             clientConnectionString: this.clientConnectionString,
             sourcePath: this.sourcePath);
+
     }
 
     /// <summary>
