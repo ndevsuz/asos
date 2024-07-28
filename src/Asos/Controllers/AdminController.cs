@@ -7,7 +7,7 @@ namespace Asos.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/token")]
+[Route("api/[controller]")]
 public class AdminController(ITokenService tokenService, ILoginService loginService) : BaseController
 {
     [AllowAnonymous]
