@@ -1,4 +1,4 @@
-﻿namespace Asos.Services.Main.Projects.Models;
+﻿namespace Asos.Models;
 
 public class ProjectsPath
 {

@@ -1,4 +1,4 @@
-﻿namespace Asos.Services.Main;
+﻿namespace Asos.Services;
 
 public class ProjectOrchestationService
 {

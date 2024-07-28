@@ -1,7 +1,7 @@
 ﻿using Asos.Helpers;
-using Asos.Services.Main.Projects.Models;
+using Asos.Models;
 
-namespace Asos.Services.Main.Projects
+namespace Asos.Services
 {
     public class ProjectInitializerService(string projectName,
         IHostEnvironment hostEnvironment = null
