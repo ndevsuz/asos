@@ -1,3 +1,5 @@
+using Asos.Helpers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -13,6 +15,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
+Process.ExecuteCommand("dotnet --version    ");
 app.UseHttpsRedirection();
 
 app.Run();
