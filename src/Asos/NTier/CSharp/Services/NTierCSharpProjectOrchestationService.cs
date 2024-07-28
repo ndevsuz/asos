@@ -1,4 +1,4 @@
-﻿namespace Asos.Services;
+﻿namespace Asos.NTier.CSharp.Services;
 
 public class NTierCSharpProjectOrchestationService
 {

@@ -1,12 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Asos.Services;
+namespace Asos.NTier.CSharp.Services;
 
 public class NTierCSharpModelService
 {
     public void SplitModels(IFormFile formFile, string targetModelsPath)
     {
-        string inputFilePath = formFile.FileName; 
+        string inputFilePath = formFile.FileName;
         string outputDirectory = targetModelsPath;
 
         if (!Directory.Exists(outputDirectory))

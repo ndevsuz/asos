@@ -1,7 +1,7 @@
 ﻿using Asos.Helpers;
-using Asos.Models;
+using Asos.NTier.CSharp.Models;
 
-namespace Asos.Services;
+namespace Asos.NTier.CSharp.Services;
 
 public class NTierCSharpPackageInstallerService
 {

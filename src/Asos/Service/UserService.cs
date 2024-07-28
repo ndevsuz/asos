@@ -1,6 +1,6 @@
-namespace Asos.Services;
+namespace Asos.Service;
 
 public class UserService
 {
-    
+
 }

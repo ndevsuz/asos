@@ -1,4 +1,4 @@
-﻿namespace Asos.Models;
+﻿namespace Asos.NTier.CSharp.Models;
 
 public class ProjectsPath
 {
