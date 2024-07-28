@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Asos.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/token")]
 public class AdminController(ITokenService tokenService, ILoginService loginService) : BaseController
 {
+    [Authorize]
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateToken()
     {

@@ -8,5 +8,5 @@ public class UnauthorizedException : Exception
     public UnauthorizedException(string message, Exception innerException) : base(message, innerException)
     { }
 
-    public int StatusCode { get; set; } = 404;
+    public int StatusCode { get; set; } = 401;
 }

@@ -1,7 +1,6 @@
 using Asos.Extensions;
 using Asos.Redis;
 using StackExchange.Redis;
-using Asos.Helpers;
 using Asos.Middlewares;
 using Asos.Models;
 
@@ -35,9 +34,11 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseStaticFiles();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
-app.MapControllers();
-app.UseAuthorization();
-app.UseAuthentication();
 app.UseHttpsRedirection();
+app.UseAuthentication(); 
+app.UseAuthorization();
+app.MapControllers();
+
+
 
 app.Run();
