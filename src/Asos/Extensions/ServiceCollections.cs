@@ -1,3 +1,8 @@
+using System.Text;
+using Asos.Interfaces;
+using Asos.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace Asos.Extensions;
@@ -6,10 +11,34 @@ public static class ServiceCollections
 {
     public static void AddServices(this IServiceCollection services)
     {
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ILoginService, LoginService>();
     }
 
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
+        var key = Encoding.UTF8.GetBytes(configuration["JWT:SecurityKey"]);
+
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+            });
     }
 
     public static void ConfigureSwagger(this IServiceCollection services)

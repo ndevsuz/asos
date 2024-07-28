@@ -47,6 +47,15 @@ public class ExceptionHandlerMiddleware
                 Message = ex.Message,
             });
         }
+        catch (UnauthorizedException ex)
+        {
+            context.Response.StatusCode = ex.StatusCode;
+            await context.Response.WriteAsJsonAsync(new Response
+            {
+                StatusCode = context.Response.StatusCode,
+                Message = ex.Message,
+            });
+        }
         catch (Exception ex)
         {
             context.Response.StatusCode = 500;
