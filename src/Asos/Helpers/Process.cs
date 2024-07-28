@@ -12,7 +12,8 @@ namespace Asos.Helpers
             {
                 fileName = "cmd.exe";
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 fileName = "/bin/bash";
             }
@@ -39,6 +40,7 @@ namespace Asos.Helpers
                     Console.WriteLine($"ERROR: {args.Data}");
                 }
             };
+
 
             process.Start();
 
