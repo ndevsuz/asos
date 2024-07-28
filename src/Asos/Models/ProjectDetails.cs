@@ -1,5 +1,4 @@
 using Asos.Enums;
-using Architecture = System.Runtime.InteropServices.Architecture;
 
 namespace Asos.Models;
 

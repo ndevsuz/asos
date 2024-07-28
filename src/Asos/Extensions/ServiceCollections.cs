@@ -11,8 +11,10 @@ public static class ServiceCollections
 {
     public static void AddServices(this IServiceCollection services)
     {
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<ILoginService, LoginService>();
+        services
+            .AddScoped<ITokenService, TokenService>()
+            .AddScoped<ILoginService, LoginService>()
+            .AddScoped<IUserService, UserService>();
     }
 
     public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
@@ -70,7 +72,7 @@ public static class ServiceCollections
                 }
             });
         });
-        
+
         services.AddCors(options =>
         {
             options.AddPolicy("AllowAll",

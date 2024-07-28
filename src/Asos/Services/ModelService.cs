@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Asos.Service;
+namespace Asos.Services;
 
 public class ModelService
 {
