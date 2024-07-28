@@ -4,7 +4,7 @@ namespace Asos.Helpers
 {
     public static class Process
     {
-        public static void ExecuteCommand(string command)
+        public static void ExecuteCommand(string command, string messages = null)
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             var fileName = string.Empty;

@@ -13,7 +13,6 @@
 
     <ItemGroup>
       <Folder Include="TheStandart\CSharp\Models\" />
-      <Folder Include="TheStandart\CSharp\Services\" />
       <Folder Include="wwwroot\" />
     </ItemGroup>
 
