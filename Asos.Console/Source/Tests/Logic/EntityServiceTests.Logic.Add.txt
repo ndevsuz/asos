@@ -1,0 +1,49 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ApiProjectName}}.Models.{{ModelNamePlural}};
+using FluentAssertions;
+using Force.DeepCloner;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldAdd{{ModelName}}Async()
+        {
+            // given
+            DateTimeOffset randomDate = GetRandomDatetimeOffset();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(randomDate);
+            {{ModelName}} input{{ModelName}} = random{{ModelName}};
+            {{ModelName}} persisted{{ModelName}} = input{{ModelName}};
+            {{ModelName}} expected{{ModelName}} = persisted{{ModelName}}.DeepClone();
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(randomDate);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Insert{{ModelName}}Async(input{{ModelName}})).ReturnsAsync(persisted{{ModelName}});
+
+            // when
+            {{ModelName}} actual{{ModelName}} = await this.{{modelName}}Service
+                .Add{{ModelName}}Async(input{{ModelName}});
+
+            // then
+            actual{{ModelName}}.Should().BeEquivalentTo(expected{{ModelName}});
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Insert{{ModelName}}Async(input{{ModelName}}), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

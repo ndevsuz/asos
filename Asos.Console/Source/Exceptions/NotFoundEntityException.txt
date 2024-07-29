@@ -1,0 +1,14 @@
+﻿{{Header}}
+
+using System;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class NotFound{{ModelName}}Exception : Xeption
+    {
+        public NotFound{{ModelName}}Exception(Guid {{modelName}}Id)
+            : base(message: $"Couldn't find {{modelName}} with id: {{{modelName}}Id}.")
+        { }
+    }
+}

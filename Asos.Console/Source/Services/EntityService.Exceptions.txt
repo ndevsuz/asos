@@ -1,0 +1,131 @@
+{{Header}}
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using EFxceptions.Models.Exceptions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}Service
+    {
+        private delegate ValueTask<{{ModelName}}> Returning{{ModelName}}Function();
+        private delegate IQueryable<{{ModelName}}> Returning{{ModelNamePlural}}Function();
+
+        private async ValueTask<{{ModelName}}> TryCatch(Returning{{ModelName}}Function returning{{ModelName}}Function)
+        {
+            try
+            {
+                return await returning{{ModelName}}Function();
+            }
+            catch (Null{{ModelName}}Exception null{{ModelName}}Exception)
+            {
+                throw CreateAndLogValidationException(null{{ModelName}}Exception);
+            }
+            catch (Invalid{{ModelName}}Exception invalid{{ModelName}}Exception)
+            {
+                throw CreateAndLogValidationException(invalid{{ModelName}}Exception);
+            }
+            catch (NotFound{{ModelName}}Exception notFound{{ModelName}}Exception)
+            {
+                throw CreateAndLogValidationException(notFound{{ModelName}}Exception);
+            }
+            catch (SqlException sqlException)
+            {
+                var failed{{ModelName}}StorageException = new Failed{{ModelName}}StorageException(sqlException);
+
+                throw CreateAndLogCriticalDependencyException(failed{{ModelName}}StorageException);
+            }
+            catch (DuplicateKeyException duplicateKeyException)
+            {
+                var alreadyExists{{ModelName}}Exception = new AlreadyExists{{ModelName}}Exception(duplicateKeyException);
+
+                throw CreateAndLogDependencyValidationException(alreadyExists{{ModelName}}Exception);
+            }
+            catch (DbUpdateConcurrencyException dbUpdateConcurrencyException)
+            {
+                var locked{{ModelName}}Exception = new Locked{{ModelName}}Exception(dbUpdateConcurrencyException);
+
+                throw CreateAndLogDependencyValidationException(locked{{ModelName}}Exception);
+            }
+            catch (DbUpdateException databaseUpdateException)
+            {
+                var failed{{ModelName}}StorageException = new Failed{{ModelName}}StorageException(databaseUpdateException);
+
+                throw CreateAndLogDependencyException(failed{{ModelName}}StorageException);
+            }
+            catch (Exception exception)
+            {
+                var failed{{ModelName}}ServiceException = new Failed{{ModelName}}ServiceException(exception);
+
+                throw CreateAndLogServiceException(failed{{ModelName}}ServiceException);
+            }
+        }
+
+        private IQueryable<{{ModelName}}> TryCatch(Returning{{ModelNamePlural}}Function returning{{ModelNamePlural}}Function)
+        {
+            try
+            {
+                return returning{{ModelNamePlural}}Function();
+            }
+            catch (SqlException sqlException)
+            {
+                var failed{{ModelName}}StorageException = new Failed{{ModelName}}StorageException(sqlException);
+
+                throw CreateAndLogCriticalDependencyException(failed{{ModelName}}StorageException);
+            }
+            catch (Exception serviceException)
+            {
+                var failed{{ModelName}}ServiceException = new Failed{{ModelName}}ServiceException(serviceException);
+
+                throw CreateAndLogServiceException(failed{{ModelName}}ServiceException);
+            }
+        }
+
+        private {{ModelName}}ValidationException CreateAndLogValidationException(Xeption exception)
+        {
+            var {{modelName}}ValidationException = new {{ModelName}}ValidationException(exception);
+            this.loggingBroker.LogError({{modelName}}ValidationException);
+
+            return {{modelName}}ValidationException;
+        }
+
+        private {{ModelName}}DependencyException CreateAndLogCriticalDependencyException(Xeption exception)
+        {
+            var {{ModelName}}DependencyException = new {{ModelName}}DependencyException(exception);
+            this.loggingBroker.LogCritical({{ModelName}}DependencyException);
+
+            return {{ModelName}}DependencyException;
+        }
+
+        private {{ModelName}}DependencyException CreateAndLogDependencyException(Xeption exception)
+        {
+            var {{modelName}}DependencyException = new {{ModelName}}DependencyException(exception);
+            this.loggingBroker.LogError({{modelName}}DependencyException);
+
+            return {{modelName}}DependencyException;
+        }
+
+
+        private {{ModelName}}DependencyValidationException CreateAndLogDependencyValidationException(Xeption exception)
+        {
+            var {{modelName}}DependencyValidationException = new {{ModelName}}DependencyValidationException(exception);
+            this.loggingBroker.LogError({{modelName}}DependencyValidationException);
+
+            return {{modelName}}DependencyValidationException;
+        }
+
+        private {{ModelName}}ServiceException CreateAndLogServiceException(Xeption innerException)
+        {
+            var {{modelName}}ServiceException = new {{ModelName}}ServiceException(innerException);
+            this.loggingBroker.LogError({{modelName}}ServiceException);
+
+            return {{modelName}}ServiceException;
+        }
+    }
+}

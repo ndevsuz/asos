@@ -1,0 +1,14 @@
+﻿{{Header}}
+
+using System;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class AlreadyExists{{ModelName}}Exception : Xeption
+    {
+        public AlreadyExists{{ModelName}}Exception(Exception innerException)
+            : base(message: "{{ModelName}} already exists.", innerException)
+        { }
+    }
+}

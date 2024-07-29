@@ -1,0 +1,81 @@
+{{Header}}
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using {{ProjectName}}.Brokers.DateTimes;
+using {{ProjectName}}.Brokers.Loggings;
+using {{ProjectName}}.Brokers.Storages;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}Service : I{{ModelName}}Service
+    {
+
+        private readonly IStorageBroker storageBroker;
+        private readonly IDateTimeBroker dateTimeBroker;
+        private readonly ILoggingBroker loggingBroker;
+
+        public {{ModelName}}Service(
+            IStorageBroker storageBroker,
+            IDateTimeBroker dateTimeBroker,
+            ILoggingBroker loggingBroker)
+
+        {
+            this.storageBroker = storageBroker;
+            this.dateTimeBroker = dateTimeBroker;
+            this.loggingBroker = loggingBroker;
+        }
+
+        public ValueTask<{{ModelName}}> Add{{ModelName}}Async({{ModelName}} {{modelName}}) =>
+        TryCatch(async () =>
+        {
+            Validate{{ModelName}}OnAdd({{modelName}});
+
+            return await this.storageBroker.Insert{{ModelName}}Async({{modelName}});
+        });
+
+        public IQueryable<{{ModelName}}> RetrieveAll{{ModelNamePlural}}() =>
+            TryCatch(() => this.storageBroker.SelectAll{{ModelNamePlural}}());
+
+        public ValueTask<{{ModelName}}> Retrieve{{ModelName}}ByIdAsync(Guid {{modelName}}Id) =>
+           TryCatch(async () =>
+           {
+               Validate{{ModelName}}Id({{modelName}}Id);
+
+               {{ModelName}} maybe{{ModelName}} =
+                   await storageBroker.Select{{ModelName}}ByIdAsync({{modelName}}Id);
+
+               ValidateStorage{{ModelName}}(maybe{{ModelName}}, {{modelName}}Id);
+
+               return maybe{{ModelName}};
+           });
+
+        public ValueTask<{{ModelName}}> Modify{{ModelName}}Async({{ModelName}} {{modelName}}) =>
+            TryCatch(async () =>
+            {
+                Validate{{ModelName}}OnModify({{modelName}});
+
+                {{ModelName}} maybe{{ModelName}} =
+                    await this.storageBroker.Select{{ModelName}}ByIdAsync({{modelName}}.Id);
+
+                ValidateAgainstStorage{{ModelName}}OnModify(input{{ModelName}}: {{modelName}}, storage{{ModelName}}: maybe{{ModelName}});
+
+                return await this.storageBroker.Update{{ModelName}}Async({{modelName}});
+            });
+
+        public ValueTask<{{ModelName}}> Remove{{ModelName}}ByIdAsync(Guid {{modelName}}Id) =>
+           TryCatch(async () =>
+           {
+               Validate{{ModelName}}Id({{modelName}}Id);
+
+               {{ModelName}} maybe{{ModelName}} =
+                   await this.storageBroker.Select{{ModelName}}ByIdAsync({{modelName}}Id);
+
+               ValidateStorage{{ModelName}}(maybe{{ModelName}}, {{modelName}}Id);
+
+               return await this.storageBroker.Delete{{ModelName}}Async(maybe{{ModelName}});
+           });
+    }
+}

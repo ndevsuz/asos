@@ -1,0 +1,356 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using FluentAssertions;
+using Force.DeepCloner;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIf{{ModelName}}IsNullAndLogItAsync()
+        {
+            // given
+            {{ModelName}} null{{ModelName}} = null;
+            var null{{ModelName}}Exception = new Null{{ModelName}}Exception();
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(null{{ModelName}}Exception);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task = this.{{modelName}}Service.Modify{{ModelName}}Async(null{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task ShouldThrowValidationExceptionOnModifyIf{{ModelName}}IsInvalidAndLogItAsync(string invalidString)
+        {
+            // given
+            {{ModelName}} invalid{{ModelName}} = new {{ModelName}}
+            {
+                {{NameProp}} = invalidString
+            };
+
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+{{Validations}}
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.CreatedDate),
+                values: "Date is required");
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.UpdatedDate),
+                values: new[]
+                    {
+                        "Date is required",
+                        "Date is not recent",
+                        $"Date is the same as {nameof({{ModelName}}.CreatedDate)}"
+                    }
+                );
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Returns(GetRandomDateTime);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task = this.{{modelName}}Service.Modify{{ModelName}}Async(invalid{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsNotSameAsCreatedDateAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(randomDateTime);
+            {{ModelName}} invalid{{ModelName}} = random{{ModelName}};
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.UpdatedDate),
+                values: $"Date is the same as {nameof({{ModelName}}.CreatedDate)}");
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(randomDateTime);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(invalid{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                 await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(invalid{{ModelName}}.Id), Times.Never);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidSeconds))]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsNotRecentAndLogItAsync(int minutes)
+        {
+            // given
+            DateTimeOffset dateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(dateTime);
+            {{ModelName}} input{{ModelName}} = random{{ModelName}};
+            input{{ModelName}}.UpdatedDate = dateTime.AddMinutes(minutes);
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.UpdatedDate),
+                values: "Date is not recent");
+
+            var expected{{ModelName}}ValidatonException =
+                new {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(dateTime);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(input{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidatonException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidatonException))), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(It.IsAny<Guid>()), Times.Never);
+
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIf{{ModelName}}DoesNotExistAndLogItAsync()
+        {
+            // given
+            int negativeMinutes = GetRandomNegativeNumber();
+            DateTimeOffset dateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandom{{ModelName}}(dateTime);
+            {{ModelName}} nonExist{{ModelName}} = random{{ModelName}};
+            nonExist{{ModelName}}.CreatedDate = dateTime.AddMinutes(negativeMinutes);
+            {{ModelName}} null{{ModelName}} = null;
+
+            var notFound{{ModelName}}Exception = new NotFound{{ModelName}}Exception(nonExist{{ModelName}}.Id);
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(notFound{{ModelName}}Exception);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(nonExist{{ModelName}}.Id))
+                    .ReturnsAsync(null{{ModelName}});
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(dateTime);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(nonExist{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(
+                    modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(nonExist{{ModelName}}.Id), Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageCreatedDateNotSameAsCreatedDateAndLogItAsync()
+        {
+            // given
+            int randomNumber = GetRandomNegativeNumber();
+            int randomMinutes = randomNumber;
+            DateTimeOffset randomDateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandomModify{{ModelName}}(randomDateTime);
+            {{ModelName}} invalid{{ModelName}} = random{{ModelName}}.DeepClone();
+            {{ModelName}} storage{{ModelName}} = invalid{{ModelName}}.DeepClone();
+            storage{{ModelName}}.CreatedDate = storage{{ModelName}}.CreatedDate.AddMinutes(randomMinutes);
+            storage{{ModelName}}.UpdatedDate = storage{{ModelName}}.UpdatedDate.AddMinutes(randomMinutes);
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+            Guid {{modelName}}Id = invalid{{ModelName}}.Id;
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.CreatedDate),
+                values: $"Date is not same as {nameof({{ModelName}}.CreatedDate)}");
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync({{modelName}}Id)).ReturnsAsync(storage{{ModelName}});
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(randomDateTime);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(invalid{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync(invalid{{ModelName}}.Id), Times.Once());
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageUpdatedDateSameAsUpdatedDateAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTime = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandomModify{{ModelName}}(randomDateTime);
+            {{ModelName}} invalid{{ModelName}} = random{{ModelName}};
+            {{ModelName}} storage{{ModelName}} = random{{ModelName}}.DeepClone();
+            invalid{{ModelName}}.UpdatedDate = storage{{ModelName}}.UpdatedDate;
+            Guid {{modelName}}Id = invalid{{ModelName}}.Id;
+            var invalid{{ModelName}}Exception = new Invalid{{ModelName}}Exception();
+
+            invalid{{ModelName}}Exception.AddData(
+                key: nameof({{ModelName}}.UpdatedDate),
+                values: $"Date is the same as {nameof({{ModelName}}.UpdatedDate)}");
+
+            var expected{{ModelName}}ValidationException =
+                new {{ModelName}}ValidationException(invalid{{ModelName}}Exception);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync(invalid{{ModelName}}.Id)).ReturnsAsync(storage{{ModelName}});
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(randomDateTime);
+
+            // when
+            ValueTask<{{ModelName}}> modify{{ModelName}}Task =
+                this.{{modelName}}Service.Modify{{ModelName}}Async(invalid{{ModelName}});
+
+            {{ModelName}}ValidationException actual{{ModelName}}ValidationException =
+                await Assert.ThrowsAsync<{{ModelName}}ValidationException>(modify{{ModelName}}Task.AsTask);
+
+            // then
+            actual{{ModelName}}ValidationException.Should()
+                .BeEquivalentTo(expected{{ModelName}}ValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync({{modelName}}Id), Times.Once());
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ValidationException))), Times.Once);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once());
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

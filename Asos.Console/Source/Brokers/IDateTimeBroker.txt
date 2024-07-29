@@ -1,0 +1,11 @@
+{{Header}}
+
+using System;
+
+namespace {{NameSpace}}
+{
+    public interface IDateTimeBroker
+    {
+        DateTimeOffset GetCurrentDateTimeOffset();
+    }
+}

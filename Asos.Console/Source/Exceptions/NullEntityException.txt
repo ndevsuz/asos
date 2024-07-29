@@ -1,0 +1,14 @@
+{{Header}}
+
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class Null{{ModelName}}Exception : Xeption
+    {
+        public Null{{ModelName}}Exception()
+            : base(message: "{{ModelName}} is null.")
+        { }
+    }
+}
+

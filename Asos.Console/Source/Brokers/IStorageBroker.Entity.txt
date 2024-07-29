@@ -1,0 +1,18 @@
+{{Header}}
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+
+namespace {{NameSpace}}
+{
+    public partial interface IStorageBroker
+    {
+        ValueTask<{{ModelName}}> Insert{{ModelName}}Async({{ModelName}} {{modelName}});
+        IQueryable<{{ModelName}}> SelectAll{{ModelNamePlural}}();
+        ValueTask<{{ModelName}}> Select{{ModelName}}ByIdAsync(Guid {{modelName}}Id);
+        ValueTask<{{ModelName}}> Delete{{ModelName}}Async({{ModelName}} {{modelName}});
+        ValueTask<{{ModelName}}> Update{{ModelName}}Async({{ModelName}} {{modelName}});
+    }
+}

@@ -1,0 +1,13 @@
+﻿{{Header}}
+
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class {{ModelName}}ValidationException : Xeption
+    {
+        public {{ModelName}}ValidationException(Xeption innerException)
+            : base(message: "{{ModelName}} validation error occured, fix the errors and try again.", innerException)
+        { }
+    }
+}

@@ -1,0 +1,30 @@
+{{Header}}
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using {{ProjectName}}.Models.{{ModelNamePlural}};
+using Microsoft.EntityFrameworkCore;
+
+namespace {{NameSpace}}
+{
+    public partial class StorageBroker
+    {
+        public DbSet<{{ModelName}}> {{ModelNamePlural}} { get; set; }
+
+        public async ValueTask<{{ModelName}}> Insert{{ModelName}}Async({{ModelName}} {{modelName}}) =>
+            await InsertAsync({{modelName}});
+
+        public IQueryable<{{ModelName}}> SelectAll{{ModelNamePlural}}() =>
+            SelectAll<{{ModelName}}>();
+
+        public async ValueTask<{{ModelName}}> Select{{ModelName}}ByIdAsync(Guid {{modelName}}Id) =>
+            await SelectAsync<{{ModelName}}>({{modelName}}Id);
+
+        public async ValueTask<{{ModelName}}> Delete{{ModelName}}Async({{ModelName}} {{modelName}}) =>
+            await DeleteAsync({{modelName}});
+
+        public async ValueTask<{{ModelName}}> Update{{ModelName}}Async({{ModelName}} {{modelName}}) =>
+            await UpdateAsync({{modelName}});
+    }
+}

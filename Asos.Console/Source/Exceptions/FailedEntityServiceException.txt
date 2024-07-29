@@ -1,0 +1,14 @@
+{{Header}}
+
+using System;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class Failed{{ModelName}}ServiceException : Xeption
+    {
+        public Failed{{ModelName}}ServiceException(Exception innerException)
+            : base(message: "Failed {{modelName}} service error occurred, please contact support.", innerException)
+        { }
+    }
+}

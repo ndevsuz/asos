@@ -1,0 +1,39 @@
+{{Header}}
+
+using System.Linq;
+using {{ApiProjectName}}.Models.{{ModelNamePlural}};
+using FluentAssertions;
+using Force.DeepCloner;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public void ShouldRetrieveAll{{ModelNamePlural}}()
+        {
+            //given
+            IQueryable<{{ModelName}}> random{{ModelNamePlural}} = CreateRandom{{ModelNamePlural}}();
+            IQueryable<{{ModelName}}> storage{{ModelNamePlural}} = random{{ModelNamePlural}};
+            IQueryable<{{ModelName}}> expected{{ModelNamePlural}} = storage{{ModelNamePlural}}.DeepClone();
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectAll{{ModelNamePlural}}()).Returns(storage{{ModelNamePlural}});
+
+            //when
+            IQueryable<{{ModelName}}> actual{{ModelNamePlural}} =
+                this.{{modelName}}Service.RetrieveAll{{ModelNamePlural}}();
+
+            //then
+            actual{{ModelNamePlural}}.Should().BeEquivalentTo(expected{{ModelNamePlural}});
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectAll{{ModelNamePlural}}(), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

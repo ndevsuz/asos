@@ -1,0 +1,60 @@
+{{Header}}
+
+using System;
+using System.Threading.Tasks;
+using {{ApiProjectName}}.Models.{{ModelNamePlural}};
+using FluentAssertions;
+using Force.DeepCloner;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public async Task ShouldModify{{ModelName}}Async()
+        {
+            // given
+            DateTimeOffset randomDate = GetRandomDateTime();
+            {{ModelName}} random{{ModelName}} = CreateRandomModify{{ModelName}}(randomDate);
+            {{ModelName}} input{{ModelName}} = random{{ModelName}};
+            {{ModelName}} storage{{ModelName}} = input{{ModelName}}.DeepClone();
+            storage{{ModelName}}.UpdatedDate = random{{ModelName}}.CreatedDate;
+            {{ModelName}} updated{{ModelName}} = input{{ModelName}};
+            {{ModelName}} expected{{ModelName}} = updated{{ModelName}}.DeepClone();
+            Guid {{modelName}}Id = input{{ModelName}}.Id;
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset()).Returns(randomDate);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Select{{ModelName}}ByIdAsync({{modelName}}Id))
+                    .ReturnsAsync(storage{{ModelName}});
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.Update{{ModelName}}Async(input{{ModelName}}))
+                    .ReturnsAsync(updated{{ModelName}});
+
+            // when
+            {{ModelName}} actual{{ModelName}} =
+               await this.{{modelName}}Service.Modify{{ModelName}}Async(input{{ModelName}});
+
+            // then
+            actual{{ModelName}}.Should().BeEquivalentTo(expected{{ModelName}});
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Select{{ModelName}}ByIdAsync({{modelName}}Id), Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.Update{{ModelName}}Async(input{{ModelName}}), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

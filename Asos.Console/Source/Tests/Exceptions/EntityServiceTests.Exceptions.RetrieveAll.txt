@@ -1,0 +1,91 @@
+{{Header}}
+
+using System;
+using {{ProjectName}}.Models.{{ModelNamePlural}}.Exceptions;
+using FluentAssertions;
+using Microsoft.Data.SqlClient;
+using Moq;
+using Xunit;
+
+namespace {{NameSpace}}
+{
+    public partial class {{ModelName}}ServiceTests
+    {
+        [Fact]
+        public void ShouldThrowCriticalDependencyExceptionOnRetrieveAllWhenSqlExceptionOccursAndLogIt()
+        {
+            //given
+            SqlException sqlException = CreateSqlException();
+
+            var failedStorageException =
+                new Failed{{ModelName}}StorageException(sqlException);
+
+            var expected{{ModelName}}DependencyException =
+                new {{ModelName}}DependencyException(failedStorageException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectAll{{ModelNamePlural}}()).Throws(sqlException);
+
+            //when
+            Action retrieveAll{{ModelNamePlural}}Action = () =>
+                this.{{modelName}}Service.RetrieveAll{{ModelNamePlural}}();
+
+            {{ModelName}}DependencyException actual{{ModelName}}DependencyException =
+                Assert.Throws<{{ModelName}}DependencyException>(retrieveAll{{ModelNamePlural}}Action);
+
+            //then
+            actual{{ModelName}}DependencyException.Should().BeEquivalentTo(
+                expected{{ModelName}}DependencyException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectAll{{ModelNamePlural}}(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogCritical(It.Is(SameExceptionAs(
+                    expected{{ModelName}}DependencyException))), Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public void ShouldThrowServiceExceptionOnRetrieveAllIfServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            string exceptionMessage = GetRandomString();
+            var serviceException = new Exception(exceptionMessage);
+
+            var failed{{ModelName}}ServiceException =
+                new Failed{{ModelName}}ServiceException(serviceException);
+
+            var expected{{ModelName}}ServiceException =
+                new {{ModelName}}ServiceException(failed{{ModelName}}ServiceException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectAll{{ModelNamePlural}}()).Throws(serviceException);
+
+            // when
+            Action retrieveAll{{ModelNamePlural}}Action = () =>
+                this.{{modelName}}Service.RetrieveAll{{ModelNamePlural}}();
+
+            {{ModelName}}ServiceException actual{{ModelName}}ServiceException =
+                Assert.Throws<{{ModelName}}ServiceException>(retrieveAll{{ModelNamePlural}}Action);
+
+            // then
+            actual{{ModelName}}ServiceException.Should().BeEquivalentTo(expected{{ModelName}}ServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectAll{{ModelNamePlural}}(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expected{{ModelName}}ServiceException))),
+                        Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+    }
+}

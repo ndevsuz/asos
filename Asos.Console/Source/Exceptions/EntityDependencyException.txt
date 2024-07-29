@@ -1,0 +1,14 @@
+{{Header}}
+
+using System;
+using Xeptions;
+
+namespace {{NameSpace}}
+{
+    public class {{ModelName}}DependencyException : Xeption
+    {
+        public {{ModelName}}DependencyException(Exception innerException)
+            : base(message: "{{ModelName}} dependency error occured, contact support.", innerException)
+        { }
+    }
+}
